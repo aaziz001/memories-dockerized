@@ -48,14 +48,13 @@ services:
       dockerfile: Dockerfile
     image: memories-client
     container_name: memories-react-client
-    command: npm run start
     volumes:
       - ./memories-frontend/:/usr/app
       - /usr/app/node_modules
     depends_on:
       - memories-backend
     ports:
-      - "3000:3000"
+      - "3000:80"
     networks:
       - memories-app
 

@@ -1,0 +1,71 @@
+version: '3.7'
+
+services:
+  memories-backend:
+    build:
+      context: ./memories-backend
+      dockerfile: Dockerfile
+    image: memories-server
+    container_name: memories-node-server
+    command: npm run start
+    volumes:
+      - ./memories-backend/:/usr/app
+      - /usr/src/app/node_modules
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - WAIT_HOSTS = mongo:27017
+      - NODE_ENV = development
+      - PORT = 5000
+      - CONNECTION_URL = "mongodb://mongo:27017"
+    networks:
+      - memories-app
+
+  mongo:
+    image: mongo
+    container_name: mongo-ms
+    command: mongod --wiredTigerCacheSizeGB 3
+    networks:
+      - memories-app
+    build:
+      context: ./mongoMS
+    ports:
+      - "2717:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  memories-frontend:
+    build:
+      context: ./memories-frontend
+      dockerfile: Dockerfile
+    image: memories-client
+    container_name: memories-react-client
+    command: npm run start
+    volumes:
+      - ./memories-frontend/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - memories-backend
+    ports:
+      - "3000:3000"
+    networks:
+      - memories-app
+
+networks:
+      memories-app:
+        driver: bridge
+
+volumes:
+    data-volume:
+    node_modules:
+    web-root:
+    mongo-data:
+      driver: local
